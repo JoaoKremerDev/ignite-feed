@@ -1,42 +1,75 @@
+import { Avatar } from './Avatar';
 import Comment from './Comment';
 import styles from './Post.module.css';
 
-function Post() {
+import { useState } from 'react';
+
+interface PostsProps {
+    publishedAt: Date;
+    author: any;
+    content: any;
+}
+
+function Post({ publishedAt, author, content }: PostsProps) {
+
+    const [comments, setComments] = useState([
+        'Post muito bacana, hein?!'
+    ]);
+
+    const [newComment, setNewComment] = useState('');
+
+    const handleCreateNewComment = (event) => {
+        event?.preventDefault();
+        setComments([...comments, newComment])
+        setNewComment('')
+    }
+
+    const handleNewCommentChange = (e) => {
+        setNewComment(e.target.value)
+    }
+
+    const publishedDateFormated = new Intl.DateTimeFormat('pt-BR', {
+        day: '2-digit',
+        month: 'long',
+        hour: '2-digit',
+        minute: '2-digit'
+    }).format(publishedAt)
+
     return (
         <article className={styles.post}>
             <header>
                 <div className={styles.author}>
-                    <img className={styles.avatar} src="https://github.com/JoaoKremerDev.png" alt="" />
+                    <Avatar src={author.avatarUrl} />
                     <div className={styles.authorInfo}>
-                        <strong>João Vitor Kremer</strong>
-                        <span>Web Developer</span>
+                        <strong>{author.name}</strong>
+                        <span>{author.role}</span>
                     </div>
                 </div>
 
-                <time title="29 de agosto às 20:11" dateTime='2022-05-11 08:13:30'>Publicado hà 1h</time>
+                <time title={publishedDateFormated} dateTime={"2022-05-11 08:13:30"}>{publishedDateFormated}</time>
             </header>
 
             <div className={styles.content}>
-                <p>Fala galeraa 👋</p>
-                <p>Acabei de subir mais um projeto no meu portifa. É um projeto que fiz no NLW Return, evento da Rocketseat. O nome do projeto é DoctorCare 🚀 </p>
-                <p><a href="#">jane.design/doctorcare</a></p>
-                <p>
-                    <a href='#'>#rocketseat</a>{' '}
-                    <a href='#'>#nlw</a>{' '}
-                    <a href='#'>#novoprojeto</a>{' '}
-                </p>
+                {content.map( (item, index)  => {
+                    if (item.type == 'paragraph') {
+                        return <p key={index}>{item.content}</p>
+                    } else if (item.type == 'link') {
+                        return <p key={index}><a href="#">{item.content}</a></p>
+                    }
+                })}
             </div>
 
-            <form className={styles.commentForm}>
+            <form onSubmit={handleCreateNewComment} className={styles.commentForm}>
                 <strong>Deixe seu feedback</strong>
-
-                <textarea placeholder='Deixe um comentário'></textarea>
+                <textarea value={newComment} placeholder='Deixe um comentário' name='comment' onChange={handleNewCommentChange}></textarea>
                 <footer>
-                <button type='submit'>Publicar</button>
+                    <button type='submit'>Publicar</button>
                 </footer>
             </form>
             <div className={styles.commentList}>
-                <Comment />
+                {comments.map((comment, index) => {
+                    return <Comment key={index} content={comment} />
+                })}
             </div>
         </article>
     );
